@@ -1,4 +1,4 @@
-from app.models.product_models import ProductCreate, ProductResponse, ProductUpdate
+from app.schemas.product_models import ProductCreate, ProductResponse, ProductUpdate
 
 
 class ProductServices():

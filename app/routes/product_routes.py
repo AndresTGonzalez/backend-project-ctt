@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.models.product_models import ProductCreate, ProductResponse, ProductUpdate
+from app.schemas.product_models import ProductCreate, ProductResponse, ProductUpdate
 from app.services.product_services import ProductServices
 
 product_router = APIRouter(prefix="/products", tags=["Products"])

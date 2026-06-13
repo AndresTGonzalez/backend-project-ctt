@@ -1,4 +1,4 @@
-from app.models.health_check_models import HealthCheck
+from app.schemas.health_check_models import HealthCheck
 
 
 class HealthServices():
