@@ -8,20 +8,20 @@ product_service = ProductServices()
 
 @product_router.get("/")
 def get_all_products_api() -> list[ProductResponse]:
-    return product_service.get_all_products()
+    pass
 
 @product_router.get("/{product_id}")
 def get_product_api(product_id: int) -> ProductResponse | None:
-    return product_service.get_product(product_id=product_id)
+    pass
 
 @product_router.post("/")
 def create_product_api (product_data: ProductCreate) -> ProductResponse:
-    return product_service.create_product(product_data=product_data)
+    pass
 
 @product_router.put("/{product_id}")
 def update_product_api(product_id: int, product_data: ProductUpdate) -> ProductResponse | None:
-    return product_service.update_product(product_id=product_id, product_data=product_data)
+    pass
 
 @product_router.delete("/{product_id}")
 def delete_product_api(product_id: int) -> bool:
-    return product_service.delete_product(product_id=product_id)
+    pass
