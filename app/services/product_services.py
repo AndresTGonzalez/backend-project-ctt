@@ -1,8 +1,11 @@
+import json
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.product import Product
 from app.schemas.product_models import ProductCreate, ProductResponse, ProductUpdate
+from app.core.cache import redis_client
 
 
 class ProductServices():
@@ -11,16 +14,36 @@ class ProductServices():
 
 
     def get_all_products(self, db: Session) -> list[ProductResponse]: 
+        cache_key: str = "products:active:list"
+        cached_products = redis_client.get(cache_key)
+
+        if cached_products:
+            return json.loads(cached_products)
+
         products = db.scalars(
             select(Product).where(Product.is_active == True)
         ).all()
-        return products
+
+        response = [
+            ProductResponse.model_validate(product).model_dump(mode="json")
+            for product in products
+        ]
+
+        redis_client.setex(
+            name=cache_key,
+            time=3600,
+            value=json.dumps(response)
+        )
+
+        return response
 
     def get_product(self, product_id: int, db: Session) -> ProductResponse | None:
         product = db.get(Product, product_id)
         return product
 
     def create_product(self, product_data: ProductCreate, db: Session) -> ProductResponse:
+        cache_key: str = "products:active:list"
+
         product = Product(
             **product_data.model_dump()
         )
@@ -28,9 +51,13 @@ class ProductServices():
         db.commit()
         db.refresh(product)
 
+        redis_client.delete(cache_key)
+
         return product
 
     def update_product(self, product_id: int, product_data: ProductUpdate, db: Session) -> ProductResponse | None:
+        cache_key: str = "products:active:list"
+
         product = db.get(Product, product_id)
         if not product:
             return None
@@ -43,15 +70,20 @@ class ProductServices():
         db.commit()
         db.refresh(product)
 
+        redis_client.delete(cache_key)
+
         return product
 
     def delete_product(self, product_id: int, db: Session) -> bool:
+        cache_key: str = "products:active:list"
         product = db.get(Product, product_id)
         if not product:
             return False
         
         db.delete(product)
         db.commit()
+
+        redis_client.delete(cache_key)
 
         return True
 
