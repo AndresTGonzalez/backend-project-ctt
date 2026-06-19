@@ -1,16 +1,25 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.product_models import ProductCreate, ProductResponse, ProductUpdate
+from app.schemas.product_models import (
+    PaginatedProductResponse,
+    ProductCreate,
+    ProductResponse,
+    ProductUpdate,
+)
 from app.services.product_services import ProductServices
 
 product_router = APIRouter(prefix="/products", tags=["Products"])
 product_service = ProductServices()
 
 @product_router.get("/")
-def get_all_products_api(db: Session = Depends(get_db)) -> list[ProductResponse]:
-    return product_service.get_all_products(db=db)
+def get_all_products_api(
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+) -> PaginatedProductResponse:
+    return product_service.get_all_products(db=db, page=page, page_size=page_size)
 
 @product_router.get("/{product_id}")
 def get_product_api(product_id: int, db: Session = Depends(get_db)) -> ProductResponse | None:
